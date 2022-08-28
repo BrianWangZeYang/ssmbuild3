@@ -1,0 +1,5 @@
+URL
+/emp/{id} GET查询员工
+/emp POST保存员工
+/emp/{id} PUT 修改员工
+/emp/{id} DELETE删除员工
