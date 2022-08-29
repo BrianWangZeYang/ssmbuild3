@@ -64,52 +64,38 @@
   </div>
 </div>
 <!-- 员工修改的模态框 -->
-<div class="modal fade" id="empUpdateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="bookUpdateModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">员工修改</h4>
+        <h4 class="modal-title" id="myModalLabelForUpdate">书籍修改</h4>
       </div>
       <div class="modal-body">
         <form class="form-horizontal">
           <div class="form-group">
-            <label class="col-sm-2 control-label">empName</label>
+            <label class="col-sm-2 control-label">书籍名称</label>
             <div class="col-sm-10">
-              <p class="form-control-static" id="empName_update_static"></p>
+              <input type="text" name="bookName" class="form-control" id="bookName_update_input">
             </div>
           </div>
           <div class="form-group">
-            <label class="col-sm-2 control-label">email</label>
+            <label class="col-sm-2 control-label">书籍数量</label>
             <div class="col-sm-10">
-              <input type="text" name="email" class="form-control" id="email_update_input" placeholder="email@atguigu.com">
-              <span class="help-block"></span>
+              <input type="text" name="bookCounts" class="form-control" id="bookCount_update_input">
             </div>
           </div>
           <div class="form-group">
-            <label class="col-sm-2 control-label">gender</label>
+            <label class="col-sm-2 control-label">书籍描述</label>
             <div class="col-sm-10">
-              <label class="radio-inline">
-                <input type="radio" name="gender" id="gender1_update_input" value="M" checked="checked"> 男
-              </label>
-              <label class="radio-inline">
-                <input type="radio" name="gender" id="gender2_update_input" value="F"> 女
-              </label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-sm-2 control-label">deptName</label>
-            <div class="col-sm-4">
-              <!-- 部门提交部门id即可 -->
-              <select class="form-control" name="dId">
-              </select>
+              <input type="text" name="detail" class="form-control" id="booInfo_update_input">
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-        <button type="button" class="btn btn-primary" id="emp_update_btn">更新</button>
+        <button type="button" class="btn btn-primary" id="book_update_btn">保存</button>
       </div>
     </div>
   </div>
@@ -126,22 +112,24 @@
   </div>
   <div class="row">
     <div class="col-md-4 col-md-offset-8">
-      <button  class="btn btn-danger">
+      <button  class="btn btn-danger" id="book_delete_all_btn" >
         删除
       </button>
       <button  class="btn btn-primary" id="book_add_model_btn">
         新增
       </button>
       <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/toAddBook">新增书籍</a>
-      <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/allBook">图书列表</a>
+      <button  class="btn btn-primary" id="book_all_model_btn">
+        图书列表
+      </button>
     </div>
     <div class="col-md-4 column"></div>
     <%--查询书籍--%>
-    <div class="col-md-4 column">
+    <div id="bookQueryModel" class="col-md-4 column">
       <span style="color:red ;font-weight:bold">${error}</span>
-      <form style="float: right" class="form-inline" action="${pageContext.request.contextPath}/book/queryBook">
+      <form  style="float: right" class="form-inline">
         <input type="text" name="queryBookName" class="form-control" placeholder="请输入要查询书籍的名称" required>
-        <input type="submit" value="查询" class="btn btn-primary">
+        <input id="book_query_btn" type="button" value="查询" class="btn btn-primary">
       </form>
     </div>
   </div>
@@ -185,9 +173,13 @@
   //1、页面加载完成以后，直接去发送ajax请求,要到分页数据
   $(function(){
     //去首页
-    to_page(2);
+    to_page(1);
 
   });
+  //点击图书列表回到首页
+  $("#book_all_model_btn").click(function () {
+    to_page(1);
+  })
 
   function to_page(pn){
     $.ajax({
@@ -405,56 +397,45 @@
   $(document).on("click",".edit_btn",function(){
     //alert("edit");
 
-
-    //1、查出部门信息，并显示部门列表
-    getDepts("#empUpdateModal select");
     //2、查出员工信息，显示员工信息
     getEmp($(this).attr("edit-id"));
 
     //3、把员工的id传递给模态框的更新按钮
-    $("#emp_update_btn").attr("edit-id",$(this).attr("edit-id"));
-    $("#empUpdateModal").modal({
+    $("#book_update_btn").attr("edit-id",$(this).attr("edit-id"));
+    $("#bookUpdateModel").modal({
       backdrop:"static"
     });
   });
 
   function getEmp(id){
     $.ajax({
-      url:"${APP_PATH}/emp/"+id,
+      url:"${APP_PATH}/book/queryBookById/"+id,
       type:"GET",
       success:function(result){
-        //console.log(result);
-        var empData = result.extend.emp;
-        $("#empName_update_static").text(empData.empName);
-        $("#email_update_input").val(empData.email);
-        $("#empUpdateModal input[name=gender]").val([empData.gender]);
-        $("#empUpdateModal select").val([empData.dId]);
+        //在控制台看数据的返回结果
+        console.log(result);
+        var Book = result.extend.Book;
+        $("#bookName_update_input").val(Book.bookName);
+        $("#bookCount_update_input").val(Book.bookCounts);
+        $("#booInfo_update_input").val(Book.detail);
       }
     });
   }
 
   //点击更新，更新员工信息
-  $("#emp_update_btn").click(function(){
-    //验证邮箱是否合法
+  $("#book_update_btn").click(function(){
+    //验证邮箱是否合法，验证邮箱信息目前先省略
     //1、校验邮箱信息
-    var email = $("#email_update_input").val();
-    var regEmail = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
-    if(!regEmail.test(email)){
-      show_validate_msg("#email_update_input", "error", "邮箱格式不正确");
-      return false;
-    }else{
-      show_validate_msg("#email_update_input", "success", "");
-    }
 
     //2、发送ajax请求保存更新的员工数据
     $.ajax({
-      url:"${APP_PATH}/emp/"+$(this).attr("edit-id"),
+      url:"${APP_PATH}/book/updateBook/"+$(this).attr("edit-id"),
       type:"PUT",
-      data:$("#empUpdateModal form").serialize(),
+      data:$("#bookUpdateModel form").serialize(),
       success:function(result){
         //alert(result.msg);
         //1、关闭对话框
-        $("#empUpdateModal").modal("hide");
+        $("#bookUpdateModel").modal("hide");
         //回到当前页面
         to_page(currentPage);
       }
@@ -489,15 +470,15 @@
     $(".check_item").prop("checked",$(this).prop("checked"));
   });
 
-  //check_item
+  //check_item,当所有的单选框都点满之后，顶部的框也要随之勾选，动态变化
   $(document).on("click",".check_item",function(){
-    //判断当前选择中的元素是否5个
+    //判断当前选择中的元素是否5个，为避免写死，此处比较的所有的元素check_item的值
     var flag = $(".check_item:checked").length==$(".check_item").length;
     $("#check_all").prop("checked",flag);
   });
 
   //点击全部删除，就批量删除
-  $("#emp_delete_all_btn").click(function(){
+  $("#book_delete_all_btn").click(function(){
     //
     var empNames = "";
     var del_idstr = "";
@@ -514,7 +495,7 @@
     if(confirm("确认删除【"+empNames+"】吗？")){
       //发送ajax请求删除
       $.ajax({
-        url:"${APP_PATH}/emp/"+del_idstr,
+        url:"${APP_PATH}/book/deleteBook/"+del_idstr,
         type:"DELETE",
         success:function(result){
           alert(result.msg);
@@ -546,6 +527,23 @@
        to_page(totalRecord);
      }
    });
+  });
+
+  $("#book_query_btn").click(function () {
+    $.ajax({
+      url:"${APP_PATH}/book/queryBook",
+      type:"POST",
+      data:$("#bookQueryModel form").serialize(),
+      success:function (result) {
+        //console.log(result);
+        //1、解析并显示员工数据
+        build_emps_table(result);
+        //2、解析并显示分页信息
+        build_page_info(result);
+        //3、解析显示分页条数据
+        build_page_nav(result);
+      }
+    });
   });
 </script>
 </body>

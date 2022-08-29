@@ -27,5 +27,8 @@ public interface BookService {
     List<Books> queryAllBook();
 
     //通过名字模糊查询书籍
-    Books queryBookByName(String queryBookName);
+    List<Books> queryBookByName(String queryBookName);
+
+    //批量删除书籍
+    void deleteBatch(List<Integer> ids);
 }

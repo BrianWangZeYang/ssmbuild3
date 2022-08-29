@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import sun.misc.Request;
 
+import javax.servlet.http.HttpServletRequest;
 import java.awt.print.Book;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +40,25 @@ public class BookController {
         PageInfo page = new PageInfo(emps, 5);
 
         return Msg.success().add("pageInfo", page);
+}
+
+    @RequestMapping("/queryBook")
+    @ResponseBody
+    public Msg queryBook(String queryBookName){
+        System.out.println(queryBookName);
+        List<Books> books = bookService.queryBookByName(queryBookName);
+        PageInfo page = new PageInfo(books, 5);
+        return Msg.success().add("pageInfo", page);
     }
+
+    @RequestMapping(value = "/queryBookById/{id}",method=RequestMethod.GET)
+    @ResponseBody
+    public Msg queryBookById(@PathVariable("id")Integer id){
+        Books books = bookService.queryBookById(id);
+
+        return Msg.success().add("Book", books);
+    }
+
     //Ajax增加员工方法，此处使用restful风格
     //由于提交过来的属性和Books类的属性相同，所以此处直接使用Books来接收
     @RequestMapping(value = "/addBook" ,method = RequestMethod.POST)
@@ -58,19 +78,46 @@ public class BookController {
         return "updateBook";
     }
 
-    @RequestMapping("/updateBook")
-    public String updateBook(Books books){
-        System.out.println(books);
+    /**
+     * 更新员工
+     * @param books
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/updateBook/{bookID}",method=RequestMethod.PUT)
+    @ResponseBody
+    public Msg updateBook(Books books, HttpServletRequest request){
+        System.out.println("请求体中的值："+request.getParameter("bookName"));
+        System.out.println("将要更新的书籍数据:"+books);
         bookService.updateBook(books);
-        return "redirect:/book/allBook";
+        return Msg.success();
     }
+
+ /*   @ResponseBody
+    @RequestMapping(value="/emp/{empId}",method=RequestMethod.PUT)
+    public Msg saveEmp(Employee employee, HttpServletRequest request){
+        System.out.println("请求体中的值："+request.getParameter("gender"));
+        System.out.println("将要更新的员工数据："+employee);
+        employeeService.updateEmp(employee);
+        return Msg.success()	;
+    }*/
+
     @ResponseBody
     @RequestMapping(value="/deleteBook/{bookID}",method= RequestMethod.DELETE)
     public Msg deleteBook(@PathVariable("bookID") String ids){
-        System.out.println("执行到了这里");
-        System.out.println(ids);
-        int id = Integer.parseInt(ids);
-        bookService.deleteBookById(id);
+
+        if(ids.contains("-")){
+            List<Integer> del_ids = new ArrayList<>();
+            String[] str_ids = ids.split("-");
+            //组装id的集合
+            for (String string : str_ids) {
+                del_ids.add(Integer.parseInt(string));
+                bookService.deleteBookById(Integer.parseInt(string));
+            }
+        }else {
+            int id = Integer.parseInt(ids);
+            bookService.deleteBookById(id);
+        }
         return Msg.success();
     }
 
@@ -87,18 +134,5 @@ public class BookController {
         return "redirect:/book/allBook";
     }
 
-    @RequestMapping("/queryBook")
-    public String queryBook(String queryBookName, Model model){
-        Books books = bookService.queryBookByName(queryBookName);
-        ArrayList<Books> booksList = new ArrayList<>();
-        booksList.add(books);
-        if (books == null){
-            model.addAttribute("error","未查到");
-            List<Books> list = bookService.queryAllBook();
-            model.addAttribute("list",list);
-            return "allBook";
-        }
-        model.addAttribute("list",booksList);
-        return "allBook";
-    }
+
 }

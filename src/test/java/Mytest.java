@@ -57,8 +57,8 @@ public class Mytest {
     public void queryBookByName(){
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
         BookService bookServiceImpl = (BookService) context.getBean("BookServiceImpl");
-        Books books = bookServiceImpl.queryBookByName("狂神");
-        System.out.println(books);
+       // Books books = bookServiceImpl.queryBookByName("狂神");
+       // System.out.println(books);
     }
     @Test
     public void random(){

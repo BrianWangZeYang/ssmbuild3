@@ -17,5 +17,5 @@ public interface BookMapper {
     //查询全部Book,返回list集合
     List<Books> queryAllBook();
     //通过名字模糊查询书籍
-    Books queryBookByName(String name);
+    List<Books> queryBookByName(String name);
 }
